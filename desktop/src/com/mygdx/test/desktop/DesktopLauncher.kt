@@ -10,6 +10,7 @@ object DesktopLauncher {
         val config = Lwjgl3ApplicationConfiguration().apply {
             setTitle("test")
             setWindowedMode(1000, 750)
+            setForegroundFPS(60)
         }
         Lwjgl3Application(Game(), config)
     }

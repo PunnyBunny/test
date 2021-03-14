@@ -5,19 +5,30 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import ktx.graphics.use
 
 data class Vertex(val deltaX: Float, val deltaY: Float)
+
+private fun min(a: Vertex, b: Vertex): Vertex {
+    if (a.deltaX < b.deltaX || (a.deltaX == b.deltaX && a.deltaY < b.deltaY)) return a
+    return b
+}
+
+private fun max(a: Vertex, b: Vertex): Vertex {
+    if (a.deltaX > b.deltaX || (a.deltaX == b.deltaX && a.deltaY > b.deltaY)) return a
+    return b
+}
+
 data class Edge(val vertexA: Vertex, val vertexB: Vertex) {
-    override fun hashCode(): Int {
-        return vertexA.hashCode() xor vertexB.hashCode()
-    }
+    val a = min(vertexA, vertexB)
+    val b = max(vertexA, vertexB)
 
     override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other !is Edge) return false
+        return a == other.a && b == other.b
+    }
 
-        other as Edge
-
-        return (vertexA == other.vertexA && vertexB == other.vertexB) ||
-                (vertexA == other.vertexB && vertexB == other.vertexA)
+    override fun hashCode(): Int {
+        var result = a.hashCode()
+        result = 31 * result + b.hashCode()
+        return result
     }
 }
 
@@ -40,19 +51,19 @@ class Shape(
 
         regionVerticesFlattened = regions.map {
             val verticesFlattened =
-                    it.edges.map { e -> listOf(e.vertexA.deltaX + x, e.vertexA.deltaY + y) }.flatten() +
-                            listOf(it.edges.first().vertexA.deltaX + x, it.edges.first().vertexA.deltaY + y)
+                    it.edges.map { e -> listOf(e.a.deltaX + x, e.a.deltaY + y) }.flatten() +
+                            listOf(it.edges.first().a.deltaX + x, it.edges.first().a.deltaY + y)
             verticesFlattened.toFloatArray()
         }
 
-        width = edges.maxOf { it.vertexA.deltaX } - edges.minOf { it.vertexA.deltaX }
-        height = edges.maxOf { it.vertexA.deltaY } - edges.minOf { it.vertexA.deltaY }
+        width = edges.maxOf { it.a.deltaX } - edges.minOf { it.a.deltaX }
+        height = edges.maxOf { it.a.deltaY } - edges.minOf { it.a.deltaY }
     }
 
     fun neighbours(): List<Shape> {
         return externalEdges.map { externalEdge ->
-            val dx = externalEdgesMapping[externalEdge]!!.vertexA.deltaX - externalEdge.vertexA.deltaX
-            val dy = externalEdgesMapping[externalEdge]!!.vertexA.deltaY - externalEdge.vertexA.deltaY
+            val dx = externalEdge.a.deltaX - externalEdgesMapping[externalEdge]!!.a.deltaX
+            val dy = externalEdge.a.deltaY - externalEdgesMapping[externalEdge]!!.a.deltaY
             Shape(x + dx, y + dy, regions.map { Region(it.edges, false) }, externalEdgesMapping)
         }
     }

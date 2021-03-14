@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx.gl
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.Queue
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.mygdx.test.shape.Edge
@@ -45,6 +44,7 @@ class GameScreen(
             ),
     )
     private var shapes = hashSetOf(Shape(0f, 0f, listOf(region1, region2), externalEdgeMappings))
+    private val screenBuffer = 200f
 
     init {
         camera.position.set(0f, 0f, 0f)
@@ -52,29 +52,35 @@ class GameScreen(
 
         // add reverse entries, aka e(u, v) -> e(p, q) to e(p, q) -> e(u, v)
         externalEdgeMappings.putAll(externalEdgeMappings.map { (k, v) -> Pair(v, k) })
+        externalEdgeMappings.putAll(externalEdgeMappings.map { (k, v) ->
+            Pair(Edge(k.b, k.a), Edge(v.b, v.a))
+        })
     }
 
     override fun render(delta: Float) {
-        gl.glClearColor(0f, 0f, 0f, 1f);
-        gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        camera.zoom *= 1.001f
-        camera.translate(delta, delta, 0f)
         camera.update()
-        println("${camera.position}")
+        gl.glClearColor(0f, 0f, 0f, 1f)
+        gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        camera.update()
 
         val newShapes = HashSet<Shape>()
         val queue = Queue<Shape>()
         shapes.forEach { queue.addLast(it); newShapes.add(it) }
+
+//        for ((k, v) in externalEdgeMappings) {
+//            println("e((${k.a.deltaX}, ${k.a.deltaY}),(${k.b.deltaX}, ${k.b.deltaY}))->" +
+//                    "e((${v.a.deltaX}, ${v.a.deltaY}),(${v.b.deltaX}, ${v.b.deltaY}))")
+//        }
         while (queue.notEmpty()) {
             val shape = queue.first()
             queue.removeFirst()
 
             for (nextShape in shape.neighbours()) {
+                println("${nextShape.x} ${nextShape.y}")
                 if (camera.frustum.boundsInFrustum(
-                                Vector3(nextShape.x, nextShape.y, 0f),
-                                Vector3(nextShape.width * 2, nextShape.height * 2, 0f)) // point visible
-                        && !newShapes.contains(nextShape)) {
+                                nextShape.x, nextShape.y, 0f,
+                                nextShape.width, nextShape.height, 0f
+                        ) && !newShapes.contains(nextShape)) {
                     newShapes.add(nextShape)
                     queue.addLast(nextShape)
                 }
@@ -82,12 +88,6 @@ class GameScreen(
         }
 
         shapes = newShapes
-        shapes.removeIf { shape ->
-            !camera.frustum.boundsInFrustum(
-                    Vector3(shape.x, shape.y, 0f),
-                    Vector3(shape.width * 2, shape.height * 2, 0f),
-            )
-        }
         shapes.forEach { it.render(camera, shapeRenderer) }
     }
 
