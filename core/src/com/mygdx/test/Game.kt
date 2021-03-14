@@ -23,7 +23,11 @@ class Game : KtxGame<KtxScreen>() {
             bindSingleton<Viewport>(ExtendViewport(1000f, 700f, inject()))
 
 //            addScreen(MenuScreen(inject()))
-            addScreen(GameScreen(inject(), inject(), inject()))
+            addScreen(GameScreen(
+                    inject<Camera>() as OrthographicCamera,
+                    inject(),
+                    inject(),
+            ))
         }
         setScreen<GameScreen>()
     }
