@@ -1,0 +1,79 @@
+[
+  {
+    "name": "octagon",
+    "data": [
+      {
+        "type": 0,
+        "neighbourAngles": [
+          45.0,
+          180.0,
+          315.0
+        ],
+        "neighbourDistances": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "neighbourTypes": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "type": 1,
+        "neighbourAngles": [
+          90.0,
+          225.0,
+          315.0
+        ],
+        "neighbourDistances": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "neighbourTypes": [
+          3,
+          0,
+          2
+        ]
+      },
+      {
+        "type": 2,
+        "neighbourAngles": [
+          0.0,
+          135.0,
+          225.0
+        ],
+        "neighbourDistances": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "neighbourTypes": [
+          0,
+          1,
+          3
+        ]
+      },
+      {
+        "type": 3,
+        "neighbourAngles": [
+          45.0,
+          135.0,
+          270.0
+        ],
+        "neighbourDistances": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "neighbourTypes": [
+          2,
+          0,
+          1
+        ]
+      }
+    ]
+  }
+]

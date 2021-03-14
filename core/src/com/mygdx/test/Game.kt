@@ -22,7 +22,7 @@ class Game : KtxGame<KtxScreen>() {
             bindSingleton(Stage())
             bindSingleton(ShapeRenderer())
             bindSingleton<Camera>(OrthographicCamera().apply { setToOrtho(false, 1000f, 750f) })
-            bindSingleton<Viewport>(ExtendViewport(1000f, 700f, inject()))
+            bindSingleton<Viewport>(ExtendViewport(1000f, 750f, inject()))
 
 //            addScreen(MenuScreen(inject()))
             addScreen(GameScreen(

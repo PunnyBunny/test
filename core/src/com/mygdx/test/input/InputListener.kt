@@ -13,17 +13,20 @@ class InputListener(private val camera: OrthographicCamera) : KtxInputAdapter {
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         lastTouchTime = TimeUtils.nanoTime()
-        val curPos = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(), 0f))
+        val curPos = Vector3(screenX.toFloat(), -screenY.toFloat(), 0f)
+//        val curPos = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(), 0f))
         lastPos = curPos
 
         return true
     }
 
     override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
-        val curPos = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(), 0f))
-        camera.translate(lastPos.x - curPos.x, lastPos.y - curPos.y, 0f)
+        val curPos = Vector3(screenX.toFloat(), -screenY.toFloat(), 0f)
+//        val curPos = camera.unproject(Vector3(screenX.toFloat(), screenY.toFloat(), 0f))
+        val delta = lastPos.cpy().sub(curPos)
+        camera.translate(delta.scl(camera.zoom))
         lastPos = curPos
-
+        println("$delta $curPos")
         return true
     }
 

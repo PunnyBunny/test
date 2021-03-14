@@ -5,6 +5,11 @@ sourceSets.main.java.srcDirs = [ "src/" ]
 
 eclipse.project.name = appName + "-core"
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
 }
