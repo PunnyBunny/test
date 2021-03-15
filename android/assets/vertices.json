@@ -75,5 +75,46 @@
         ]
       }
     ]
+  },
+  {
+    "name": "arrow",
+    "data": [
+      {
+        "type": 0,
+        "neighbourTypes": [1,5,3,3],
+        "neighbourDistances": [1.0,1.0,2.82842712475,2.82842712475],
+        "neighbourAngles": [0.0,180.0,-135.0,-45.0]
+      },
+      {
+        "type": 1,
+        "neighbourTypes": [2,0],
+        "neighbourDistances": [4.0,1.0],
+        "neighbourAngles": [90.0,180.0]
+      },
+      {
+        "type": 2,
+        "neighbourTypes": [3,1],
+        "neighbourDistances": [1.0,4.0],
+        "neighbourAngles": [0.0,-90.0]
+      },
+      {
+        "type": 3,
+        "neighbourTypes": [0,0,2,4],
+        "neighbourDistances": [2.82842712475,2.82842712475,1.0,1.0],
+        "neighbourAngles": [45.0,135.0,180.0,0.0]
+      },
+      {
+        "type": 4,
+        "neighbourTypes": [5,3],
+        "neighbourDistances": [4.0,1.0],
+        "neighbourAngles": [-90.0,180.0]
+      },
+      {
+        "type": 5,
+        "neighbourTypes": [4,0],
+        "neighbourDistances": [4.0,1.0],
+        "neighbourAngles": [90.0,0.0]
+      }
+    ]
   }
 ]
