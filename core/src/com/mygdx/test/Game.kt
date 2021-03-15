@@ -34,17 +34,17 @@ class Game : KtxGame<KtxScreen>() {
         decoded.associateBy { it.name }
     }
     val vertices by lazy {
-        val renderBox = Rectangle(-300f, -300f, 600f, 600f)
+        val boxSize = 300f
+        val renderBox = Rectangle(-boxSize/2, -boxSize/2, boxSize, boxSize)
         val visitedVertices = HashMap<String, Vertex>()
         val q = ArrayDeque<Vertex>()
         val initialVertex = Vertex(Vector2(0f, 0f), 0) // initial vertex of type 0 located in centre
         q.addLast(initialVertex)
         visitedVertices[initialVertex.getKey()] = initialVertex
         while (q.isNotEmpty()) {
-            val v = q.first()
-            q.removeFirst()
+            val v = q.removeFirst()
             for (u in neighbours(v)) {
-                if (renderBox.contains(u.coordinates) &&
+                if (renderBox.contains(u.coor) &&
                         !visitedVertices.containsKey(u.getKey())) {
                     visitedVertices[u.getKey()] = u
                     q.addLast(u)
@@ -53,6 +53,7 @@ class Game : KtxGame<KtxScreen>() {
         }
         visitedVertices.map { (_, v) -> v }
     }
+    val filledAreas = mutableListOf<List<Vertex>>()
 
     override fun create() {
         context.register {
@@ -63,12 +64,15 @@ class Game : KtxGame<KtxScreen>() {
 
 //            addScreen(MenuScreen(inject()))
             addScreen(GameScreen(
+                    this@Game,
                     inject<Camera>() as OrthographicCamera,
                     inject(),
                     inject(),
-                    this@Game
             ))
-            input.inputProcessor = InputListener(inject<Camera>() as OrthographicCamera)
+            input.inputProcessor = InputListener(
+                    this@Game,
+                    inject<Camera>() as OrthographicCamera,
+            )
         }
         setScreen<GameScreen>()
     }
@@ -83,8 +87,8 @@ class Game : KtxGame<KtxScreen>() {
             val angle = shapes[shape]!!.data[v.type].neighbourAngles[i]
             val distance = shapes[shape]!!.data[v.type].neighbourDistances[i]
             val type = shapes[shape]!!.data[v.type].neighbourTypes[i]
-            val x = v.coordinates.x + distance * sin(degreesToRadians(angle))
-            val y = v.coordinates.y + distance * cos(degreesToRadians(angle))
+            val x = v.x + distance * sin(degreesToRadians(angle))
+            val y = v.y + distance * cos(degreesToRadians(angle))
             yield(Vertex(Vector2(x, y), type))
         }
     }
