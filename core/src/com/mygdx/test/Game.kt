@@ -34,7 +34,7 @@ class Game : KtxGame<KtxScreen>() {
         decoded.associateBy { it.name }
     }
     val vertices by lazy {
-        val boxSize = 300f
+        val boxSize = 100f
         val renderBox = Rectangle(-boxSize/2, -boxSize/2, boxSize, boxSize)
         val visitedVertices = HashMap<String, Vertex>()
         val q = ArrayDeque<Vertex>()
@@ -72,6 +72,7 @@ class Game : KtxGame<KtxScreen>() {
             input.inputProcessor = InputListener(
                     this@Game,
                     inject<Camera>() as OrthographicCamera,
+                    inject()
             )
         }
         setScreen<GameScreen>()

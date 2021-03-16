@@ -1,27 +1,34 @@
 package com.mygdx.test.input
 
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.utils.TimeUtils
+import com.badlogic.gdx.utils.viewport.Viewport
 import com.mygdx.test.Game
 import com.mygdx.test.shape.Vertex
 import com.mygdx.test.shape.same
 import ktx.app.KtxInputAdapter
 
-class InputListener(private val game: Game, private val camera: OrthographicCamera) : KtxInputAdapter {
-    private var lastTouchTime = 0L
+class InputListener(
+        private val game: Game,
+        private val camera: OrthographicCamera,
+        private val viewport: Viewport,
+) : KtxInputAdapter {
     private var dragged = false
     private var lastTouchScreenPos = Vector3()
 
     private val zoomFactor = 0.1f
 
+    private val minVertexX = game.vertices.minOf { it.x }
+    private val minVertexY = game.vertices.minOf { it.y }
+    private val maxVertexX = game.vertices.maxOf { it.x }
+    private val maxVertexY = game.vertices.maxOf { it.y }
+
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-        val curTime = TimeUtils.nanoTime()
         val curScreenPos = Vector3(screenX.toFloat(), -screenY.toFloat(), 0f)
 
         lastTouchScreenPos = curScreenPos
-        lastTouchTime = curTime
         dragged = false
 
         return true
@@ -32,16 +39,34 @@ class InputListener(private val game: Game, private val camera: OrthographicCame
         val delta = lastTouchScreenPos.cpy().sub(curScreenPos).scl(camera.zoom)
 
         camera.translate(delta)
+        camera.update()
+        clampBoard()
+
         lastTouchScreenPos = curScreenPos
         dragged = true
         return true
     }
 
+    private fun clampBoard() {
+        val minVertexProjected = camera.project(Vector3(minVertexX, minVertexY, 0f))
+        val maxVertexProjected = camera.project(Vector3(maxVertexX, maxVertexY, 0f))
+        println(Vector3(0f.coerceAtLeast(minVertexProjected.x),
+                0f.coerceAtLeast(minVertexProjected.y), 0f).scl(camera.zoom))
+        println(Vector3(0f.coerceAtLeast(viewport.screenWidth - maxVertexProjected.x),
+                0f.coerceAtLeast(viewport.screenHeight - maxVertexProjected.y), 0f).scl(camera.zoom))
+        camera.translate(
+                Vector3(0f.coerceAtLeast(minVertexProjected.x),
+                        0f.coerceAtLeast(minVertexProjected.y), 0f).scl(camera.zoom))
+        camera.translate(
+                Vector3(0f.coerceAtMost(maxVertexProjected.x - viewport.screenWidth),
+                        0f.coerceAtMost(maxVertexProjected.y - viewport.screenHeight), 0f).scl(camera.zoom))
+        camera.update()
+    }
+
     override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         val curScreenPos = Vector3(screenX.toFloat(), screenY.toFloat(), 0f)
-        val curTime = TimeUtils.nanoTime()
 
-        if (!dragged) { // <= 500ms
+        if (!dragged) {
             touch(curScreenPos)
         }
 
@@ -52,17 +77,21 @@ class InputListener(private val game: Game, private val camera: OrthographicCame
 
     override fun scrolled(amountX: Float, amountY: Float): Boolean {
         camera.zoom *= (1f + amountY * zoomFactor)
+        camera.zoom = MathUtils.clamp(camera.zoom, 0.005f, 0.1f)
+
+        clampBoard()
+
+        camera.update()
 
         return true
     }
+
 
     private fun touch(screenPos: Vector3) {
         val worldPos3 = camera.unproject(screenPos)
         val worldPos = Vector2(worldPos3.x, worldPos3.y)
 
         val closestVertex = game.vertices.minByOrNull { it.coor.dst(worldPos.x, worldPos.y) }!!
-
-        data class Node(val curr: Vertex, val prv: Vertex?, val angleSum: Float)
 
         val visitedVertices = HashSet<String>()
         val cycle = mutableListOf<Vertex>()
@@ -113,7 +142,5 @@ class InputListener(private val game: Game, private val camera: OrthographicCame
         }
         if (!found)
             game.filledAreas.add(cycle)
-        cycle.forEach { println(it.coor) }
-        println()
     }
 }
