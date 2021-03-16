@@ -64,11 +64,7 @@ class InputListener(private val game: Game, private val camera: OrthographicCame
 
         data class Node(val curr: Vertex, val prv: Vertex?, val angleSum: Float)
 
-        val visitedVertices = HashSet<String>() // vertex and angle sum
-//        val queue = ArrayDeque<Node>()
-//        visitedVertices[closestVertex.getKey()] = Node(closestVertex, null, 0f)
-//        queue.addLast(Node(closestVertex, null, 0f))
-
+        val visitedVertices = HashSet<String>()
         val cycle = mutableListOf<Vertex>()
 
         fun angle(u: Vector2, v: Vector2): Float { // angle uov where o is closestVertex
@@ -106,9 +102,18 @@ class InputListener(private val game: Game, private val camera: OrthographicCame
             if (findCycleByIterativeDeepeningSearch(closestVertex, 0f, depth)) break
             ++depth
         }
-        if (cycle in game.filledAreas) game.filledAreas.remove(cycle)
-        else game.filledAreas.add(cycle)
+        var found = false
+        for (i in game.filledAreas.indices) {
+            if (game.filledAreas[i].sortedWith(compareBy({ it.normalisedX }, { it.normalisedY })) ==
+                    cycle.sortedWith(compareBy({ it.normalisedX }, { it.normalisedY }))) {
+                game.filledAreas.removeAt(i)
+                found = true
+                break
+            }
+        }
+        if (!found)
+            game.filledAreas.add(cycle)
         cycle.forEach { println(it.coor) }
-
+        println()
     }
 }
